@@ -4,4 +4,6 @@ pub enum SyncError {
   InvalidRange
   InvalidOperation
   ConflictingId
+  InvalidJson
+  UnsupportedVersion
 }

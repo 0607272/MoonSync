@@ -3,7 +3,7 @@
 pub struct OpId {
   replica : String
   counter : Int
-}
+} derive(ToJson, FromJson)
 
 ///|
 pub impl Eq for OpId with fn equal(self, other) {
@@ -38,7 +38,7 @@ pub enum Operation {
   Remove(OpId, String, String, Array[OpId])
   TextInsert(OpId, String, OpId?, Char)
   TextRemove(OpId, String, OpId)
-} derive(Eq)
+} derive(Eq, ToJson, FromJson)
 
 ///|
 pub extend Operation with Eq::{equal, not_equal}
