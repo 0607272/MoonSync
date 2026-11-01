@@ -26,7 +26,9 @@ pub enum Operation {
   Remove(OpId, String, String, Array[OpId])
   TextInsert(OpId, String, OpId?, Char)
   TextRemove(OpId, String, OpId)
-}
+} derive(Eq)
+pub fn Operation::equal(Self, Self) -> Bool
+pub fn Operation::not_equal(Self, Self) -> Bool
 
 pub struct Replica {
   id : String
@@ -37,6 +39,7 @@ pub fn Replica::add(Self, String, String) -> Unit
 pub fn Replica::get(Self, String) -> String?
 pub fn Replica::members(Self, String) -> Array[String]
 pub fn Replica::merge(Self, Array[Operation]) -> Unit
+pub fn Replica::merge_checked(Self, Array[Operation]) -> Result[Int, SyncError]
 pub fn Replica::new(String) -> Self
 pub fn Replica::operations(Self) -> Array[Operation]
 pub fn Replica::remove(Self, String, String) -> Unit
@@ -49,6 +52,8 @@ pub fn Replica::try_text_insert(Self, String, Int, String) -> Result[Unit, SyncE
 
 pub enum SyncError {
   InvalidRange
+  InvalidOperation
+  ConflictingId
 }
 
 // Type aliases

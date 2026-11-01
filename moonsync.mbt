@@ -38,7 +38,10 @@ pub enum Operation {
   Remove(OpId, String, String, Array[OpId])
   TextInsert(OpId, String, OpId?, Char)
   TextRemove(OpId, String, OpId)
-}
+} derive(Eq)
+
+///|
+pub extend Operation with Eq::{equal, not_equal}
 
 ///|
 /// A mutable offline replica. Operations are retained so a replica can exchange them later.
@@ -110,6 +113,14 @@ pub fn Replica::operations(self : Replica) -> Array[Operation] {
 ///|
 /// Merge operations received from another offline replica. Duplicate operations are ignored.
 pub fn Replica::merge(self : Replica, incoming : Array[Operation]) -> Unit {
+  let _ = self.merge_checked(incoming)
+}
+
+///|
+fn Replica::merge_validated(
+  self : Replica,
+  incoming : Array[Operation],
+) -> Unit {
   let known : Map[OpId, Bool] = Map::Map([])
   for op in self.ops {
     known.set(op.id(), true)
