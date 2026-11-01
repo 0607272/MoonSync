@@ -36,11 +36,27 @@ let remote_ops = local.operations()
 local.merge(remote_ops)
 ```
 
-Register writes use a deterministic `(counter, replica)` ordering. Text operations use stable operation IDs and tombstones, so concurrent inserts and deletes can be replayed in any arrival order. The test suite covers convergence, duplicate-safe merging, observed removal, concurrent text insertion, and text deletion.
+Register writes use a deterministic `(counter, replica)` ordering, with a Lamport counter that advances after observing remote operations. Text siblings use descending counters, then ascending MoonBit string comparison for replica IDs (shortlex in the tested toolchain). New local insertions therefore appear immediately after their selected predecessor. Set members use ascending MoonBit string comparison.
+
+The tests cover convergence, observed removal, concurrent insertion, deletion, causal register writes, reordered set operations, and insertion at leading and middle offsets.
+
+## Integrate
+
+The configured package is `0607272/moonsync`, version `0.1.0`. It has **not been published yet**. After publication, install it with:
+
+```bash
+moon add 0607272/moonsync@0.1.0
+```
+
+Add `"0607272/moonsync"` to the consuming package's `import` list in `moon.pkg` to use the `@moonsync` alias shown above.
+
+## Limitations
+
+This is an experimental in-memory library for short text and small operation logs. Use distinct replica IDs and only exchange operations created by trusted replicas; conflicting operations with reused IDs are unsupported. Keep replica state alive between edits to avoid reusing counters. Operation export is a shallow copy, so callers must not mutate nested remove-tag arrays. Text offsets count MoonBit characters, not grapheme clusters; callers must supply valid nonnegative offsets. Traversal is recursive and rendering scans the full log. There is no JSON codec, persistence, version vector, compaction, transport, or untrusted-input validation in this version.
 
 ## Project status
 
-This repository is an original MoonBit implementation for the MoonBit Hackathon. It is not a port of an existing CRDT implementation. The public package name is currently `username/moonsync` as a template; replace `username` with the applicant's Mooncakes/GitHub namespace before publishing.
+This is an original MoonBit implementation for the MoonBit Hackathon, inspired by standard CRDT concepts. It is not a port of an existing implementation. The local repository retains actual development commits; remote upload and Mooncakes publication are pending.
 
 ## License
 

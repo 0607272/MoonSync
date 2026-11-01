@@ -9,7 +9,7 @@
 //   "moonbitlang/x@0.4.6",
 // }
 
-name = "username/moonsync"
+name = "0607272/moonsync"
 
 version = "0.1.0"
 
@@ -19,7 +19,7 @@ repository = ""
 
 license = "Apache-2.0"
 
-keywords = [ ]
+keywords = [ "crdt", "offline", "sync" ]
 
 preferred_target = "wasm"
 
