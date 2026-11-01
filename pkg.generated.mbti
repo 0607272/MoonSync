@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moonsync"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct OpId {
+  replica : String
+  counter : Int
+}
+pub fn OpId::equal(Self, Self) -> Bool
+pub fn OpId::hash(Self) -> Int
+pub fn OpId::hash_combine(Self, Hasher) -> Unit
+pub fn OpId::not_equal(Self, Self) -> Bool
+pub fn OpId::output(Self, &Logger) -> Unit
+pub fn OpId::to_string(Self) -> String
+pub impl Eq for OpId
+pub impl Hash for OpId
+pub impl Show for OpId
+
+pub enum Operation {
+  Register(OpId, String, String)
+  Add(OpId, String, String)
+  Remove(OpId, String, String, Array[OpId])
+  TextInsert(OpId, String, OpId?, Char)
+  TextRemove(OpId, String, OpId)
+}
+
+pub struct Replica {
+  id : String
+  mut next : Int
+  ops : Array[Operation]
+}
+pub fn Replica::add(Self, String, String) -> Unit
+pub fn Replica::get(Self, String) -> String?
+pub fn Replica::members(Self, String) -> Array[String]
+pub fn Replica::merge(Self, Array[Operation]) -> Unit
+pub fn Replica::new(String) -> Self
+pub fn Replica::operations(Self) -> Array[Operation]
+pub fn Replica::remove(Self, String, String) -> Unit
+pub fn Replica::set(Self, String, String) -> Unit
+pub fn Replica::text(Self, String) -> String
+pub fn Replica::text_delete(Self, String, Int, Int) -> Unit
+pub fn Replica::text_insert(Self, String, Int, String) -> Unit
+
+// Type aliases
+
+// Traits

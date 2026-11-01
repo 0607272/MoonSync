@@ -1,0 +1,16 @@
+name: MoonBit checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: moonbitlang/setup@v0.1
+      - run: moon check --deny-warn
+      - run: moon test --deny-warn
+      - run: moon build
+      - run: moon fmt --check
