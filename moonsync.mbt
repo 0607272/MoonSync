@@ -119,7 +119,7 @@ pub fn Replica::merge(self : Replica, incoming : Array[Operation]) -> Unit {
       known.set(op.id(), true)
       self.ops.push(op)
       let id = op.id()
-      if id.replica == self.id && id.counter >= self.next {
+      if id.counter >= self.next {
         self.next = id.counter
       }
     }
@@ -167,6 +167,7 @@ pub fn Replica::members(self : Replica, key : String) -> Array[String] {
       result.push(value)
     }
   })
+  result.sort_by(fn(a, b) { a.compare(b) })
   result
 }
 
@@ -244,11 +245,12 @@ fn Replica::text_nodes(self : Replica, key : String) -> Array[(OpId, Char)] {
 
 ///|
 fn compare_ids(a : OpId, b : OpId) -> Int {
-  let c = a.replica.compare(b.replica)
-  if c != 0 {
-    c
+  if a.counter > b.counter {
+    -1
+  } else if a.counter < b.counter {
+    1
   } else {
-    a.counter - b.counter
+    a.replica.compare(b.replica)
   }
 }
 

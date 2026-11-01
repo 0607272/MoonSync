@@ -53,3 +53,39 @@ test "text deletion removes only the selected character" {
   replica.text_delete("body", 1, 1)
   assert_eq(replica.text("body"), "ct")
 }
+
+///|
+test "a write after observing remote operations wins" {
+  let a = @moonsync.Replica::new("a")
+  let b = @moonsync.Replica::new("b")
+  for _ in 0..<8 {
+    a.set("title", "old")
+  }
+  b.merge(a.operations())
+  b.set("title", "new")
+  a.merge(b.operations())
+  assert_eq(a.get("title"), Some("new"))
+  assert_eq(b.get("title"), Some("new"))
+}
+
+///|
+test "set member arrays have deterministic order" {
+  let a = @moonsync.Replica::new("a")
+  a.add("tags", "z")
+  a.add("tags", "a")
+  let b = @moonsync.Replica::new("b")
+  let ops = a.operations()
+  b.merge([ops[1], ops[0]])
+  assert_eq(a.members("tags"), ["a", "z"])
+  assert_eq(b.members("tags"), a.members("tags"))
+}
+
+///|
+test "text insertion honors middle and leading offsets" {
+  let a = @moonsync.Replica::new("a")
+  a.text_insert("body", 0, "ac")
+  a.text_insert("body", 1, "b")
+  assert_eq(a.text("body"), "abc")
+  a.text_insert("body", 0, "!")
+  assert_eq(a.text("body"), "!abc")
+}
