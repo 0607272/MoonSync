@@ -179,7 +179,21 @@ pub fn Replica::text_insert(
   index : Int,
   text : String,
 ) -> Unit {
+  let _ = self.try_text_insert(key, index, text)
+}
+
+///|
+/// Insert at a valid character offset; reject invalid offsets without mutation.
+pub fn Replica::try_text_insert(
+  self : Replica,
+  key : String,
+  index : Int,
+  text : String,
+) -> Result[Unit, SyncError] {
   let visible = self.text_nodes(key)
+  if index < 0 || index > visible.length() {
+    return Err(InvalidRange)
+  }
   let mut after : OpId? = if index == 0 {
     None
   } else {
@@ -190,6 +204,7 @@ pub fn Replica::text_insert(
     self.ops.push(TextInsert(id, key, after, ch))
     after = Some(id)
   }
+  Ok(())
 }
 
 ///|
@@ -200,10 +215,28 @@ pub fn Replica::text_delete(
   index : Int,
   count : Int,
 ) -> Unit {
+  let _ = self.try_text_delete(key, index, count)
+}
+
+///|
+/// Delete a fully valid range; an invalid range leaves the log unchanged.
+pub fn Replica::try_text_delete(
+  self : Replica,
+  key : String,
+  index : Int,
+  count : Int,
+) -> Result[Unit, SyncError] {
   let visible = self.text_nodes(key)
+  if index < 0 ||
+    index > visible.length() ||
+    count < 0 ||
+    count > visible.length() - index {
+    return Err(InvalidRange)
+  }
   for i = index, n = 0; i < visible.length() && n < count; i = i + 1, n = n + 1 {
     self.ops.push(TextRemove(self.fresh_id(), key, visible[i].0))
   }
+  Ok(())
 }
 
 ///|

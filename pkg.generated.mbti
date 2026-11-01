@@ -44,6 +44,12 @@ pub fn Replica::set(Self, String, String) -> Unit
 pub fn Replica::text(Self, String) -> String
 pub fn Replica::text_delete(Self, String, Int, Int) -> Unit
 pub fn Replica::text_insert(Self, String, Int, String) -> Unit
+pub fn Replica::try_text_delete(Self, String, Int, Int) -> Result[Unit, SyncError]
+pub fn Replica::try_text_insert(Self, String, Int, String) -> Result[Unit, SyncError]
+
+pub enum SyncError {
+  InvalidRange
+}
 
 // Type aliases
 
