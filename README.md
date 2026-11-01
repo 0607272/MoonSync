@@ -16,10 +16,10 @@ The library does not provide a network transport, accounts, databases, web UI, o
 
 ## Run
 
-Tested with `moon 0.1.20260920` and `moonc v0.10.14+7d59c7ec9`.
-CI pins this toolchain because newer formatters can change canonical type names
-and generated interfaces. Newer compilers may run the library, but formatter and
-interface snapshots must be updated together when upgrading.
+Install the current official MoonBit toolchain from [moonbitlang.com/download](https://www.moonbitlang.com/download).
+The source uses the current canonical `Int32` type spelling; older compilers
+that only recognize `Int` are not supported. CI prints the exact toolchain
+version and checks formatting and generated interfaces alongside all three backends.
 
 ```bash
 moon check
@@ -87,7 +87,7 @@ This is an experimental library for short text and small operation logs. Exchang
 
 This is an original MoonBit implementation for the MoonBit Hackathon, inspired by standard CRDT concepts (LWW registers, observed-remove sets, RGA-style sequences). It is not a port of an existing implementation. JSON parsing and compiler-derived codecs use `moonbitlang/core/json`, from the Apache-2.0 MoonBit standard library. No third-party CRDT implementation was copied.
 
-Verified locally with `moonc v0.10.14`, `moon 0.1.20260920`: 23 tests pass on Wasm, WasmGC and JavaScript. CI installs the current official toolchain, prints its version, and runs checks/builds/tests/examples on those three targets. Mooncakes publication is still pending.
+The suite contains 23 tests on each of Wasm, WasmGC and JavaScript. CI installs the current official toolchain, prints its version, and runs checks/builds/tests/examples on those three targets, plus formatting and generated-interface checks. See the [actual workflow results](https://github.com/0607272/MoonSync/actions/workflows/check.yml) for the current revision. Mooncakes publication is still pending.
 
 ## License
 

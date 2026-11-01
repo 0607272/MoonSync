@@ -1,8 +1,8 @@
 ///|
 priv struct SavedReplica {
-  version : Int
+  version : Int32
   replica : String
-  clock : Int
+  clock : Int32
   operations : Array[Operation]
 } derive(ToJson, FromJson)
 

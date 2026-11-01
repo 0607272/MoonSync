@@ -2,7 +2,7 @@
 /// A globally unique operation identifier.
 pub struct OpId {
   replica : String
-  counter : Int
+  counter : Int32
 } derive(ToJson, FromJson)
 
 ///|
@@ -47,7 +47,7 @@ pub extend Operation with Eq::{equal, not_equal}
 /// A mutable offline replica. Operations are retained so a replica can exchange them later.
 pub struct Replica {
   id : String
-  mut next : Int
+  mut next : Int32
   ops : Array[Operation]
 }
 
@@ -187,7 +187,7 @@ pub fn Replica::members(self : Replica, key : String) -> Array[String] {
 pub fn Replica::text_insert(
   self : Replica,
   key : String,
-  index : Int,
+  index : Int32,
   text : String,
 ) -> Unit {
   let _ = self.try_text_insert(key, index, text)
@@ -198,7 +198,7 @@ pub fn Replica::text_insert(
 pub fn Replica::try_text_insert(
   self : Replica,
   key : String,
-  index : Int,
+  index : Int32,
   text : String,
 ) -> Result[Unit, SyncError] {
   let visible = self.text_nodes(key)
@@ -223,8 +223,8 @@ pub fn Replica::try_text_insert(
 pub fn Replica::text_delete(
   self : Replica,
   key : String,
-  index : Int,
-  count : Int,
+  index : Int32,
+  count : Int32,
 ) -> Unit {
   let _ = self.try_text_delete(key, index, count)
 }
@@ -234,8 +234,8 @@ pub fn Replica::text_delete(
 pub fn Replica::try_text_delete(
   self : Replica,
   key : String,
-  index : Int,
-  count : Int,
+  index : Int32,
+  count : Int32,
 ) -> Result[Unit, SyncError] {
   let visible = self.text_nodes(key)
   if index < 0 ||
@@ -288,7 +288,7 @@ fn Replica::text_nodes(self : Replica, key : String) -> Array[(OpId, Char)] {
 }
 
 ///|
-fn compare_ids(a : OpId, b : OpId) -> Int {
+fn compare_ids(a : OpId, b : OpId) -> Int32 {
   if a.counter > b.counter {
     -1
   } else if a.counter < b.counter {

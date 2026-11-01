@@ -4,7 +4,7 @@
 pub fn Replica::merge_checked(
   self : Replica,
   incoming : Array[Operation],
-) -> Result[Int, SyncError] {
+) -> Result[Int32, SyncError] {
   let all : Map[OpId, Operation] = Map::Map([])
   for op in self.ops {
     all.set(op.id(), op)

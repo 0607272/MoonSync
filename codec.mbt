@@ -1,6 +1,6 @@
 ///|
 priv struct WireLog {
-  version : Int
+  version : Int32
   operations : Array[Operation]
 } derive(ToJson, FromJson)
 

@@ -15,11 +15,11 @@ pub fn encode_operations(Array[Operation]) -> String
 // Types and methods
 pub struct OpId {
   replica : String
-  counter : Int
+  counter : Int32
 } derive(ToJson, @json.FromJson)
 pub fn OpId::equal(Self, Self) -> Bool
 pub fn OpId::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
-pub fn OpId::hash(Self) -> Int
+pub fn OpId::hash(Self) -> Int32
 pub fn OpId::hash_combine(Self, Hasher) -> Unit
 pub fn OpId::not_equal(Self, Self) -> Bool
 pub fn OpId::output(Self, &Logger) -> Unit
@@ -49,14 +49,14 @@ pub fn Receipt::encode(Self) -> String
 
 pub struct Replica {
   id : String
-  mut next : Int
+  mut next : Int32
   ops : Array[Operation]
 }
 pub fn Replica::add(Self, String, String) -> Unit
 pub fn Replica::get(Self, String) -> String?
 pub fn Replica::members(Self, String) -> Array[String]
 pub fn Replica::merge(Self, Array[Operation]) -> Unit
-pub fn Replica::merge_checked(Self, Array[Operation]) -> Result[Int, SyncError]
+pub fn Replica::merge_checked(Self, Array[Operation]) -> Result[Int32, SyncError]
 pub fn Replica::missing_operations(Self, Receipt) -> Array[Operation]
 pub fn Replica::new(String) -> Self
 pub fn Replica::operations(Self) -> Array[Operation]
@@ -66,10 +66,10 @@ pub fn Replica::restore(String) -> Result[Self, SyncError]
 pub fn Replica::set(Self, String, String) -> Unit
 pub fn Replica::snapshot(Self) -> String
 pub fn Replica::text(Self, String) -> String
-pub fn Replica::text_delete(Self, String, Int, Int) -> Unit
-pub fn Replica::text_insert(Self, String, Int, String) -> Unit
-pub fn Replica::try_text_delete(Self, String, Int, Int) -> Result[Unit, SyncError]
-pub fn Replica::try_text_insert(Self, String, Int, String) -> Result[Unit, SyncError]
+pub fn Replica::text_delete(Self, String, Int32, Int32) -> Unit
+pub fn Replica::text_insert(Self, String, Int32, String) -> Unit
+pub fn Replica::try_text_delete(Self, String, Int32, Int32) -> Result[Unit, SyncError]
+pub fn Replica::try_text_insert(Self, String, Int32, String) -> Result[Unit, SyncError]
 
 pub enum SyncError {
   InvalidRange

@@ -6,7 +6,7 @@ pub struct Receipt {
 
 ///|
 priv struct WireReceipt {
-  version : Int
+  version : Int32
   ids : Array[OpId]
 } derive(ToJson, FromJson)
 
