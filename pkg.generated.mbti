@@ -54,7 +54,9 @@ pub fn Replica::merge_checked(Self, Array[Operation]) -> Result[Int, SyncError]
 pub fn Replica::new(String) -> Self
 pub fn Replica::operations(Self) -> Array[Operation]
 pub fn Replica::remove(Self, String, String) -> Unit
+pub fn Replica::restore(String) -> Result[Self, SyncError]
 pub fn Replica::set(Self, String, String) -> Unit
+pub fn Replica::snapshot(Self) -> String
 pub fn Replica::text(Self, String) -> String
 pub fn Replica::text_delete(Self, String, Int, Int) -> Unit
 pub fn Replica::text_insert(Self, String, Int, String) -> Unit
@@ -67,6 +69,7 @@ pub enum SyncError {
   ConflictingId
   InvalidJson
   UnsupportedVersion
+  InvalidReplica
 }
 
 // Type aliases

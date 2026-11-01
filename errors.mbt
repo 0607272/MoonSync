@@ -6,4 +6,5 @@ pub enum SyncError {
   ConflictingId
   InvalidJson
   UnsupportedVersion
+  InvalidReplica
 }
