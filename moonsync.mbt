@@ -104,7 +104,7 @@ fn Replica::observed_adds(
 ///|
 /// Return all operations known by this replica.
 pub fn Replica::operations(self : Replica) -> Array[Operation] {
-  Array::from_iter(self.ops.iter())
+  self.ops.map(fn(op) { op.copy() })
 }
 
 ///|
@@ -117,7 +117,7 @@ pub fn Replica::merge(self : Replica, incoming : Array[Operation]) -> Unit {
   for op in incoming {
     if !known.contains(op.id()) {
       known.set(op.id(), true)
-      self.ops.push(op)
+      self.ops.push(op.copy())
       let id = op.id()
       if id.counter >= self.next {
         self.next = id.counter
@@ -262,5 +262,13 @@ fn Operation::id(self : Operation) -> OpId {
     Remove(id, _, _, _) => id
     TextInsert(id, _, _, _) => id
     TextRemove(id, _, _) => id
+  }
+}
+
+///|
+fn Operation::copy(self : Operation) -> Operation {
+  match self {
+    Remove(id, key, value, tags) => Remove(id, key, value, tags.copy())
+    _ => self
   }
 }
