@@ -7,10 +7,30 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [wasm, wasm-gc, js]
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: moonbitlang/setup@v0.1
-      - run: moon check --deny-warn
-      - run: moon test --deny-warn
-      - run: moon build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install MoonBit
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - run: moon version --all
+      - run: moon check --deny-warn --target ${{ matrix.target }}
+      - run: moon test --deny-warn --target ${{ matrix.target }}
+      - run: moon build --target ${{ matrix.target }}
+      - run: moon run cmd/main --target ${{ matrix.target }}
+      - run: moon run cmd/recovery --target ${{ matrix.target }}
       - run: moon fmt --check
+      - name: Verify generated interfaces
+        run: |
+          moon info
+          git diff --exit-code -- '*.mbti'

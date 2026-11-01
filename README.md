@@ -9,8 +9,10 @@ MoonSync is a MoonBit library for deterministic offline state merging. It is des
 - RGA-style character sequences for short text.
 - Globally unique operation IDs and duplicate-safe operation exchange.
 - A runnable two-replica offline editing example.
+- Checked edits and atomic merge validation, with conflicting-ID rejection.
+- Versioned JSON exchange, restart snapshots, and exact receipt based delta sync.
 
-The library does not provide a network protocol, accounts, databases, web UI, or encryption. Applications exchange `Replica::operations()` through their own transport and call `Replica::merge()` when operations arrive.
+The library does not provide a network transport, accounts, databases, web UI, or encryption. Applications store snapshot strings and exchange JSON payloads through their own storage and transport. Use `merge_checked` when you need error details; `merge` rejects a bad batch silently for compatibility.
 
 ## Run
 
@@ -20,9 +22,10 @@ Requires MoonBit 0.10.14 or newer.
 moon check
 moon test
 moon run cmd/main
+moon run cmd/recovery
 ```
 
-The example creates two offline replicas, edits the same text independently, exchanges their operation logs, and prints whether both replicas converge.
+The first example merges offline text edits. The recovery example restores a replica from a snapshot, edits on two devices, transfers JSON deltas, and verifies the resulting text is `Hello MoonBit` with zero operations left to synchronize. It uses in-memory strings; the application supplies actual file/browser storage.
 
 ## API sketch
 
@@ -33,12 +36,35 @@ local.add("tags", "offline")
 local.text_insert("body", 0, "hello")
 
 let remote_ops = local.operations()
-local.merge(remote_ops)
+let peer = @moonsync.Replica::new("device-b")
+let result = peer.merge_checked(remote_ops)
 ```
 
 Register writes use a deterministic `(counter, replica)` ordering, with a Lamport counter that advances after observing remote operations. Text siblings use descending counters, then ascending MoonBit string comparison for replica IDs (shortlex in the tested toolchain). New local insertions therefore appear immediately after their selected predecessor. Set members use ascending MoonBit string comparison.
 
-The tests cover convergence, observed removal, concurrent insertion, deletion, causal register writes, reordered set operations, and insertion at leading and middle offsets.
+The tests cover convergence, observed removal, causal register writes, insertion offsets, Unicode, atomic rejection, defensive copies, JSON errors, snapshot recovery, and delivery gaps. The three-replica suite exercises 24 deterministic schedules with reverse and duplicate delivery; it is not a proof of all possible executions.
+
+## Restart and synchronize
+
+```moonbit
+// Save this string atomically using the host application's storage.
+let saved = local.snapshot()
+match @moonsync.Replica::restore(saved) {
+  Ok(restored) => {
+    let missing = restored.missing_operations(peer.receipt())
+    let payload = @moonsync.encode_operations(missing)
+    match @moonsync.decode_operations(payload) {
+      Ok(ops) => { let _ = peer.merge_checked(ops) }
+      Err(_) => () // Report/retry using the application's error policy.
+    }
+  }
+  Err(_) => () // Preserve the bad snapshot for diagnosis; do not reuse its identity.
+}
+```
+
+Use nonempty unique replica IDs. Restore an identity on only one active writer, and save before acknowledging durable receipt. Never fork two writable copies of one snapshot. A `Receipt` records exact operation IDs, not just a maximum clock; a message arriving out of order cannot hide earlier missing operations. Serialize receipts with `Receipt::encode` and `Receipt::decode`. Receipts are O(number of operations), and are not compressed version vectors.
+
+`try_text_insert` and `try_text_delete` return `Result[Unit, SyncError]`. Negative offsets, offsets past the end and deletions extending past the end are rejected atomically. Legacy `text_insert`/`text_delete` ignore an invalid request. `merge_checked` returns the number of new operations; exact duplicates return zero. ID conflicts, invalid clocks and known cross-key/type dependencies reject the entire batch. Missing dependencies are retained and checked again when they arrive. Validation is structural, not authentication.
 
 ## Integrate
 
@@ -52,11 +78,13 @@ Add `"0607272/moonsync"` to the consuming package's `import` list in `moon.pkg` 
 
 ## Limitations
 
-This is an experimental in-memory library for short text and small operation logs. Use distinct replica IDs and only exchange operations created by trusted replicas; conflicting operations with reused IDs are unsupported. Keep replica state alive between edits to avoid reusing counters. Operation export is a shallow copy, so callers must not mutate nested remove-tag arrays. Text offsets count MoonBit characters, not grapheme clusters; callers must supply valid nonnegative offsets. Traversal is recursive and rendering scans the full log. There is no JSON codec, persistence, version vector, compaction, transport, or untrusted-input validation in this version.
+This is an experimental library for short text and small operation logs. Exchange data with trusted peers; validation does not authenticate a device or constrain payload size. Callers must limit message size and operation count. Text offsets count MoonBit characters, not user-perceived grapheme clusters. Rendering recursively scans the log and may be expensive or exhaust the stack on large documents. Clock counters are signed 32-bit integers; do not run a replica to clock exhaustion. There is no operation compaction, compressed version vector, database adapter, network transport, encryption, or thread synchronization. Snapshots retain the entire history, including deleted text: deletion is not secure erasure.
 
 ## Project status
 
-This is an original MoonBit implementation for the MoonBit Hackathon, inspired by standard CRDT concepts. It is not a port of an existing implementation. The local repository retains actual development commits; remote upload and Mooncakes publication are pending.
+This is an original MoonBit implementation for the MoonBit Hackathon, inspired by standard CRDT concepts (LWW registers, observed-remove sets, RGA-style sequences). It is not a port of an existing implementation. JSON parsing and compiler-derived codecs use `moonbitlang/core/json`, from the Apache-2.0 MoonBit standard library. No third-party CRDT implementation was copied.
+
+Verified locally with `moonc v0.10.14`, `moon 0.1.20260920`: 23 tests pass on Wasm, WasmGC and JavaScript. CI installs the current official toolchain, prints its version, and runs checks/builds/tests/examples on those three targets. Mooncakes publication is still pending.
 
 ## License
 
