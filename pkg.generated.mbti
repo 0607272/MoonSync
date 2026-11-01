@@ -41,6 +41,12 @@ pub fn Operation::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecode
 pub fn Operation::not_equal(Self, Self) -> Bool
 pub fn Operation::to_json(Self) -> Json
 
+pub struct Receipt {
+  // private fields
+}
+pub fn Receipt::decode(String) -> Result[Self, SyncError]
+pub fn Receipt::encode(Self) -> String
+
 pub struct Replica {
   id : String
   mut next : Int
@@ -51,8 +57,10 @@ pub fn Replica::get(Self, String) -> String?
 pub fn Replica::members(Self, String) -> Array[String]
 pub fn Replica::merge(Self, Array[Operation]) -> Unit
 pub fn Replica::merge_checked(Self, Array[Operation]) -> Result[Int, SyncError]
+pub fn Replica::missing_operations(Self, Receipt) -> Array[Operation]
 pub fn Replica::new(String) -> Self
 pub fn Replica::operations(Self) -> Array[Operation]
+pub fn Replica::receipt(Self) -> Receipt
 pub fn Replica::remove(Self, String, String) -> Unit
 pub fn Replica::restore(String) -> Result[Self, SyncError]
 pub fn Replica::set(Self, String, String) -> Unit
