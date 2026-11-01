@@ -16,7 +16,10 @@ The library does not provide a network transport, accounts, databases, web UI, o
 
 ## Run
 
-Requires MoonBit 0.10.14 or newer.
+Tested with `moon 0.1.20260920` and `moonc v0.10.14+7d59c7ec9`.
+CI pins this toolchain because newer formatters can change canonical type names
+and generated interfaces. Newer compilers may run the library, but formatter and
+interface snapshots must be updated together when upgrading.
 
 ```bash
 moon check
